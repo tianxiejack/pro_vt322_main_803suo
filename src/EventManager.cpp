@@ -138,6 +138,8 @@ void *CEventManager::thread_ipcEvent(void *p)
 				pThis->_Msg->MSGDRIV_send(MSGID_COM_INPUT_TRKCONTROL, 0);
 
 				pThis->_StateManager->_state->recvTrkmsg(pThis->cfg_value[CFGID_RTS_trkstat]);
+
+				
 					
 				if(1 == pThis->outtype)
 				{
