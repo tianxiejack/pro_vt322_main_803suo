@@ -94,21 +94,22 @@ CPortInterface* PortFactory::createProduct(int type)
 {
 	CPortInterface* temp = NULL;
 	uartparams_t param = {9600, 0, 8, 'N', 1};
-    	switch(type)
-    	{
+	switch(type)
+	{
 		case 1:
 			temp = new CUartProc("/dev/ttyTHS1", 115200, 0, 8, 'N', 1);
-	            	break;
-	        case 2:
+	    	break;
+        case 2:
 			temp = new CNetProc(10000);
 		   	break;
-	        case 3:
-			ReadUartParams(param);
-			temp = new CUartProc("/dev/ttyTHS2", param.baud_rate, param.flow, param.data_bits, param.parity, param.stop_bits);
-	            	break;
-	        default:
-	            	break;
+        case 3:
+			//ReadUartParams(param);
+			//temp = new CUartProc("/dev/ttyTHS2", param.baud_rate, param.flow, param.data_bits, param.parity, param.stop_bits);
+			temp = new CUartProc("/dev/ttyTHS2", 115200, 0, 8, 'N', 1);
+			break;
+        default:
+        	break;
 	}
-    	return temp;
+	return temp;
 }
 

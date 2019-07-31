@@ -27,7 +27,7 @@ CEventParsing::CEventParsing()
 	OSA_semSignal(&m_semHndl_s);
 	memset(&ComParams, 0, sizeof(ComParams));
 	exit_comParsing = false;
-	pCom1 = PortFactory::createProduct(1);
+	pCom1 = PortFactory::createProduct(0);
 	if(pCom1 != NULL)
 		comfd = pCom1->copen();
 	exit_netParsing = false;
@@ -471,24 +471,24 @@ void CEventParsing::parsingframe(unsigned char *tmpRcvBuff, int sizeRcv, comtype
 
 		while (uartdata_pos< sizeRcv)
 		{
-	        		if((0 == swap_data.reading) || (2 == swap_data.reading))
-	       		{
-	            			if(frame_head[swap_data.len] == tmpRcvBuff[uartdata_pos])
-	            			{
-	                			swap_data.buf[swap_data.pos++] =  tmpRcvBuff[uartdata_pos++];
-	                			swap_data.len++;
-	                			swap_data.reading = 2;
-	                			if(swap_data.len == sizeof(frame_head)/sizeof(char))
-	                    				swap_data.reading = 1;
-	            			}
-		           		 else
-		            		{
-		                		uartdata_pos++;
-		                		if(2 == swap_data.reading)
-		                    		memset(&swap_data, 0, sizeof(struct data_buf));
-		            		}
+    		if((0 == swap_data.reading) || (2 == swap_data.reading))
+       		{
+    			if(frame_head[swap_data.len] == tmpRcvBuff[uartdata_pos])
+    			{
+        			swap_data.buf[swap_data.pos++] =  tmpRcvBuff[uartdata_pos++];
+        			swap_data.len++;
+        			swap_data.reading = 2;
+        			if(swap_data.len == sizeof(frame_head)/sizeof(char))
+            				swap_data.reading = 1;
+    			}
+	       		 else
+        		{
+            		uartdata_pos++;
+            		if(2 == swap_data.reading)
+                		memset(&swap_data, 0, sizeof(struct data_buf));
+        		}
 			}
-		        	else if(1 == swap_data.reading)
+	    	else if(1 == swap_data.reading)
 			{
 				swap_data.buf[swap_data.pos++] = tmpRcvBuff[uartdata_pos++];
 				swap_data.len++;

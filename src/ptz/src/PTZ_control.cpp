@@ -63,7 +63,7 @@ int CPTZControl::Create()
 	m_pReqMove = (LPPELCO_D_REQPKT)sendBuffer1;
 	m_pResp = (LPPELCO_D_RESPPKT)recvBuffer;
 
-	pCom = PortFactory::createProduct(3);
+	pCom = PortFactory::createProduct(0);
 	if(pCom != NULL)
 		fd_ptz = pCom->copen();
 
