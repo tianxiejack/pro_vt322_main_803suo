@@ -10,6 +10,8 @@
 #include "StateManger.h"
 #include <opencv2/core/core.hpp>
 
+#include "803uart.h"
+
 using namespace cv;
 using namespace std;
 
@@ -17,6 +19,7 @@ typedef struct{
 	int status;
 	float errx;
 	float erry;
+	int renderCount;
 }Trkerr_t;
 
 
@@ -108,6 +111,12 @@ public:
 	OSA_ThrHndl ipcGstEvent_thid;
 	Trkerr_t m_pixelErr;
 	SELF_SemHndl m_semSendpos,m_semSendZoom;
+
+	C803COM* m_803uart;
+	OSA_ThrHndl m_803rcvhandl;
+	
+	static int sendIpcMsgFunc(CMD_ID cmd, void* prm, int len);
+	
 };
 
 

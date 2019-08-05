@@ -13,6 +13,11 @@ extern OSA_SemHndl  m_semHndl;
 extern OSA_SemHndl m_semHndl_s;
 const int profileNum = CFGID_BKID_MAX*16;
 
+int CEventManager::sendIpcMsgFunc(CMD_ID cmd, void* prm, int len)
+{
+	return pThis->m_ipc->IPCSendMsg(cmd,prm,len);
+} 
+	
 CEventManager::CEventManager()
 {
 	pThis = this;
@@ -32,11 +37,15 @@ CEventManager::CEventManager()
 	
 	SELF_semCreate(&m_semSendpos);
 	SELF_semCreate(&m_semSendZoom);
-	
+
+	m_803uart = new C803COM(sendIpcMsgFunc);
+	m_803uart->createPort();
+	OSA_thrCreate(&m_803rcvhandl, m_803uart->runUpExtcmd, 0, 0, NULL);
 }
 
 CEventManager::~CEventManager()
 {
+	OSA_thrDelete(&m_803rcvhandl);
 	SELF_semDelete(&m_semSendpos);
 	SELF_semDelete(&m_semSendZoom);
 
@@ -134,13 +143,24 @@ void *CEventManager::thread_ipcEvent(void *p)
 				pThis->m_pixelErr.errx = value;
 				memcpy(&value, pThis->cfg_value + CFGID_RTS_trkerry, 4);
 				pThis->m_pixelErr.erry = value;
+
+				pThis->m_pixelErr.renderCount = pThis->cfg_value[CFGID_RTS_rendercount];
 				
 				pThis->_Msg->MSGDRIV_send(MSGID_COM_INPUT_TRKCONTROL, 0);
 
 				pThis->_StateManager->_state->recvTrkmsg(pThis->cfg_value[CFGID_RTS_trkstat]);
 
-				
-					
+#if 0
+printf("id :%d , status = %d , errx,erry = (%f , %f) \n",
+	pThis->cfg_value[CFGID_RTS_mainch],
+	(int)pThis->cfg_value[CFGID_RTS_trkstat],
+	pThis->m_pixelErr.errx,pThis->m_pixelErr.erry );
+#endif
+		pThis->m_803uart->sendtrkerr(pThis->cfg_value[CFGID_RTS_mainch],
+						(int)pThis->cfg_value[CFGID_RTS_trkstat], 
+						pThis->m_pixelErr.errx, 
+						pThis->m_pixelErr.erry, pThis->m_pixelErr.renderCount);
+
 				if(1 == pThis->outtype)
 				{
 					memcpy(&errorx, pThis->cfg_value + CFGID_RTS_trkerrx, 4);

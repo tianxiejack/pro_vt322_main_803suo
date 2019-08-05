@@ -8,19 +8,23 @@
 #ifndef FILE803UART_H_
 #define FILE803UART_H_
 
+#include "ipc_custom_head.hpp"
+#include <vector>
 #include "PortFactory.hpp"
 #include "osa_mutex.h"
-#include <vector>
+
+typedef int (*sendIpcMsgCallback)(CMD_ID cmd, void* prm, int len);
 
 class C803COM
 {
 public:
-	C803COM();
+	C803COM(sendIpcMsgCallback pfunc);
 	~C803COM();
 	
 	void createPort();
 	void sendtrkerr(int chid,int status,float errx,float erry,int rendercount);
 	void getExtcmd();
+	static void* runUpExtcmd(void*);
 
 
 protected:
@@ -41,6 +45,7 @@ private:
 	OSA_MutexHndl m_com1mutex;
 	std::vector<unsigned char>  m_rcvBuf;
 	int m_cmdlength;
+	sendIpcMsgCallback pFunc_SendIpc;
 };
 
 

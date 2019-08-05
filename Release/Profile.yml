@@ -356,7 +356,7 @@ cfg_avt_022_01: 0
 cfg_avt_022_02: 0
 cfg_avt_022_03: 0
 cfg_avt_022_04: 7
-cfg_avt_022_05: 2
+cfg_avt_022_05: 0
 cfg_avt_022_06: 5
 cfg_avt_022_07: 0
 cfg_avt_022_08: 3
@@ -977,8 +977,8 @@ cfg_avt_060_14: 0
 cfg_avt_060_15: 0
 cfg_avt_061_00: 1
 cfg_avt_061_01: 0
-cfg_avt_061_02: 60
-cfg_avt_061_03: 60
+cfg_avt_061_02: 40
+cfg_avt_061_03: 40
 cfg_avt_061_04: 60
 cfg_avt_061_05: 60
 cfg_avt_061_06: 60

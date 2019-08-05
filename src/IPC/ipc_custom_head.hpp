@@ -33,6 +33,8 @@ typedef enum
 	focus,
 	exit_IrisAndFocus,
 	exit_img,
+	switchPip,
+	stb,
 
 	read_shm_config,
 	read_shm_block,

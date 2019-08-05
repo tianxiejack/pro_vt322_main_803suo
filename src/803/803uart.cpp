@@ -8,12 +8,19 @@
 #include "803uart.h"
 #include <math.h>
 
-C803COM::C803COM():pCom1(NULL),pCom2(NULL),existRecvThread(false),m_cmdlength(8)
+
+IPC_PRM_INT gIpcParam;
+
+static C803COM* gThis;
+	
+C803COM::C803COM(sendIpcMsgCallback pfunc):pCom1(NULL),pCom2(NULL),existRecvThread(false),m_cmdlength(8)
 {
 	memset(m_senddata,0,sizeof(m_senddata));
 	memset(m_recvdata,0,sizeof(m_recvdata));
 	OSA_mutexCreate(&m_com1mutex);
 	m_rcvBuf.clear();
+	gThis = this;
+	pFunc_SendIpc = pfunc;
 }
 
 C803COM::~C803COM()
@@ -94,6 +101,11 @@ void C803COM::calcCheckNum()
 	return;	
 }
 
+void* C803COM::runUpExtcmd(void *)
+{
+	gThis->getExtcmd();
+	return NULL;
+}
 
 void C803COM::getExtcmd()
 {
@@ -185,13 +197,68 @@ void C803COM::parsing()
 
 	if( ((checkSum>>8)&0xff) == m_rcvBuf[5] && ((checkSum&0xff) == m_rcvBuf[6]))
 	{
-		if(m_rcvBuf[3] == 0x1)
+		if(m_rcvBuf[2] != 0x0)
 		{
-			printf("enable trk\n");
+			if(m_rcvBuf[2] == 0x2)
+			{
+				gIpcParam.intPrm[0] = 1; //up
+				pFunc_SendIpc(mtdSelect, gIpcParam.intPrm, 4);
+			}
+			else if(m_rcvBuf[2] == 0x3)
+			{
+				gIpcParam.intPrm[0] = 2; //next
+				pFunc_SendIpc(mtdSelect, gIpcParam.intPrm, 4);
+			}
 		}
-		else
+
+		if(m_rcvBuf[3] != 0x0)
 		{
-			printf("disable trk\n");
+			if(m_rcvBuf[3] == 0x2)
+			{
+				gIpcParam.intPrm[0] = 2;
+				pFunc_SendIpc(switchPip, gIpcParam.intPrm, 4);	
+			}
+			else if(m_rcvBuf[3] == 0x3)
+			{
+				gIpcParam.intPrm[0] = 3;
+				pFunc_SendIpc(switchPip, gIpcParam.intPrm, 4);
+			}
+		}
+
+		if(m_rcvBuf[4] != 0x0)
+		{
+			if(m_rcvBuf[4] == 0x1)
+			{
+				printf("enable trk\n");
+				gIpcParam.intPrm[0] = 1;
+				pFunc_SendIpc(trk,gIpcParam.intPrm,4);
+			}
+			else if(m_rcvBuf[4] == 0x2)
+			{
+				printf("disable trk\n");
+				gIpcParam.intPrm[0] = 0;
+				pFunc_SendIpc(trk,gIpcParam.intPrm,4);			
+			}		
+		}
+
+		if(m_rcvBuf[5] != 0x0)
+		{
+			if(m_rcvBuf[5] == 0x2)
+			{
+				gIpcParam.intPrm[0] = 0;
+				pFunc_SendIpc(mtd, gIpcParam.intPrm, 4);			
+				pFunc_SendIpc(stb, gIpcParam.intPrm, 4);			
+			}	
+			else if(m_rcvBuf[5] == 0x3)
+			{
+				gIpcParam.intPrm[0] = 1;
+				pFunc_SendIpc(mtd, gIpcParam.intPrm, 4);			
+			}
+			else if(m_rcvBuf[5] == 0x4)
+			{
+				gIpcParam.intPrm[0] = 1;
+				pFunc_SendIpc(stb, gIpcParam.intPrm, 4);			
+			}
 		}
 	}
 	else
