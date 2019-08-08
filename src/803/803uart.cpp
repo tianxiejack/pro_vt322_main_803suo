@@ -60,7 +60,8 @@ void C803COM::sendtrkerr(int chid,int status,float errx,float erry,int rendercou
 {
 	int x,y;
 	memset(m_senddata,0,sizeof(m_senddata));
-	
+	m_senddata[0] = 0x55;
+	m_senddata[1] = 0xAA;
 	m_senddata[2] = status;
 
 	x = (int)round(errx);	
@@ -71,11 +72,17 @@ void C803COM::sendtrkerr(int chid,int status,float errx,float erry,int rendercou
 	m_senddata[5] = (y>>8)&(0xff);
 	m_senddata[6] = y&(0xff);
 
-	m_senddata[7] = chid;
+	if(chid == 0)
+		m_senddata[7] = 1;
+	else
+		m_senddata[7] = 0;
+	
 	m_senddata[8] = rendercount;
 	calcCheckNum();
-
+	m_senddata[10] = 0x0d;
+	m_senddata[11] = 0x0a;
 	OSA_mutexLock(&m_com1mutex);
+
 	pCom1->csend(com1fd, m_senddata, sizeof(m_senddata));
 	OSA_mutexUnlock(&m_com1mutex);
 	
@@ -180,7 +187,7 @@ unsigned int C803COM::recvcheck_sum()
 {
 	unsigned int sum = 0;
 	for(int i=2;i<=5;i++)
-		sum += m_rcvBuf[i-1];
+		sum += m_rcvBuf[i];
 	return sum;
 }
 
@@ -188,14 +195,14 @@ unsigned int C803COM::recvcheck_sum()
 void C803COM::parsing()
 {
 	int ret =  -1;
-	
+
 	if(m_rcvBuf.size()<m_cmdlength)
 		return;
 
 	
 	unsigned char checkSum = recvcheck_sum();
 
-	if( ((checkSum>>8)&0xff) == m_rcvBuf[5] && ((checkSum&0xff) == m_rcvBuf[6]))
+	if( ((checkSum>>8)&0xff) == m_rcvBuf[6] && ((checkSum&0xff) == m_rcvBuf[7]))
 	{
 		if(m_rcvBuf[2] != 0x0)
 		{
@@ -225,17 +232,15 @@ void C803COM::parsing()
 			}
 		}
 
-		//if(m_rcvBuf[4] != 0x0)
+		if(m_rcvBuf[4] != 0x0)
 		{
-			if(m_rcvBuf[4] == 0x1)
+			if(m_rcvBuf[4] == 0x2)
 			{
-				//printf("enable trk\n");
 				gIpcParam.intPrm[0] = 1;
 				pFunc_SendIpc(trk,gIpcParam.intPrm,4);
 			}
-			else if(m_rcvBuf[4] == 0x0)
+			else if(m_rcvBuf[4] == 0x1)
 			{
-				//printf("disable trk\n");
 				gIpcParam.intPrm[0] = 0;
 				pFunc_SendIpc(trk,gIpcParam.intPrm,4);			
 			}		
@@ -252,12 +257,12 @@ void C803COM::parsing()
 			else if(m_rcvBuf[5] == 0x3)
 			{
 				gIpcParam.intPrm[0] = 1;
-				pFunc_SendIpc(mtd, gIpcParam.intPrm, 4);			
+				pFunc_SendIpc(stb, gIpcParam.intPrm, 4);	
 			}
 			else if(m_rcvBuf[5] == 0x4)
 			{
 				gIpcParam.intPrm[0] = 1;
-				pFunc_SendIpc(stb, gIpcParam.intPrm, 4);			
+				pFunc_SendIpc(mtd, gIpcParam.intPrm, 4);	
 			}
 		}
 	}
