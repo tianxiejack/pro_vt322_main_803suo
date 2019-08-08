@@ -225,17 +225,17 @@ void C803COM::parsing()
 			}
 		}
 
-		if(m_rcvBuf[4] != 0x0)
+		//if(m_rcvBuf[4] != 0x0)
 		{
 			if(m_rcvBuf[4] == 0x1)
 			{
-				printf("enable trk\n");
+				//printf("enable trk\n");
 				gIpcParam.intPrm[0] = 1;
 				pFunc_SendIpc(trk,gIpcParam.intPrm,4);
 			}
-			else if(m_rcvBuf[4] == 0x2)
+			else if(m_rcvBuf[4] == 0x0)
 			{
-				printf("disable trk\n");
+				//printf("disable trk\n");
 				gIpcParam.intPrm[0] = 0;
 				pFunc_SendIpc(trk,gIpcParam.intPrm,4);			
 			}		
