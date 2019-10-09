@@ -64,14 +64,18 @@ void C803COM::sendtrkerr(int chid,int status,float errx,float erry,int rendercou
 	m_senddata[1] = 0xAA;
 	m_senddata[2] = status;
 
-	x = (int)round(errx);	
-	m_senddata[3] = (x>>8)&(0xff);
-	m_senddata[4] = x&(0xff);
+	x = (int)round(errx);
+	m_senddata[3] = (abs(x)>>8)&(0xff);
+	m_senddata[4] = abs(x)&(0xff);
+	if(x<0)
+		m_senddata[3] |= 0x80;
 
 	y = (int)round(erry);
-	m_senddata[5] = (y>>8)&(0xff);
-	m_senddata[6] = y&(0xff);
-
+	m_senddata[5] = (abs(y)>>8)&(0xff);
+	m_senddata[6] = abs(y)&(0xff);
+	if(y<0)
+		m_senddata[5] |= 0x80;
+	
 	if(chid == 0)
 		m_senddata[7] = 1;
 	else
@@ -242,7 +246,7 @@ void C803COM::parsing()
 			else if(m_rcvBuf[4] == 0x1)
 			{
 				gIpcParam.intPrm[0] = 0;
-				pFunc_SendIpc(trk,gIpcParam.intPrm,4);			
+				pFunc_SendIpc(trk,gIpcParam.intPrm,4);	
 			}		
 		}
 
