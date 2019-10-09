@@ -33,5 +33,6 @@ src/comm \
 src/OSA_CAP/src \
 src/IPC \
 src/DxTimer/src \
+src/803 \
 . \
 
